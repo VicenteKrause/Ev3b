@@ -4,18 +4,27 @@ import pandas as pd
 
 def load_config_files():
     """Load configuration files and parameters"""
-    # Cargar configuración SAE
+    # Leer configuración SAE
     sae_config = pd.read_csv('config_sae.csv', header=None)
-    sae_params = sae_config.iloc[0].values
+    sae_params = sae_config[0].values  # Leer como una lista de valores en una columna
     
-    # Cargar configuración Softmax
+    if len(sae_params) < 4:
+        raise ValueError("El archivo config_sae.csv debe contener al menos 4 filas para los parámetros.")
+    
+    # Leer configuración Softmax
     softmax_config = pd.read_csv('config_softmax.csv', header=None)
-    softmax_params = softmax_config.iloc[0].values
+    softmax_params = softmax_config[0].values  # Leer como una lista de valores en una columna
     
-    # Cargar índices de ganancia
+    if len(softmax_params) < 3:
+        raise ValueError("El archivo config_softmax.csv debe contener al menos 3 filas para los parámetros.")
+    
+    # Leer índices de ganancia
     idx_gain = pd.read_csv('idx_igain.csv', header=None)
-    gain_indices = idx_gain.iloc[0].values
+    gain_indices = idx_gain[0].values  # Leer como una lista de valores en la primera columna
     
+    if len(gain_indices) == 0:
+        raise ValueError("El archivo idx_igain.csv no puede estar vacío.")
+
     return {
         'sae_params': {
             'hidden_nodes': int(sae_params[0]),
@@ -31,6 +40,8 @@ def load_config_files():
         'gain_indices': gain_indices - 1  # Convertir a índices base 0
     }
 
+
+
 def load_data(file_path, gain_indices=None):
     """
     Load and preprocess data from CSV files
@@ -44,16 +55,18 @@ def load_data(file_path, gain_indices=None):
     """
     # Cargar datos
     data = pd.read_csv(file_path, header=None)
+    print(f"Datos cargados: {data.shape[0]} filas, {data.shape[1]} columnas")  # Validar cantidad de datos cargados
     
     # Separar características y etiquetas
-    X = data.iloc[:, :-1]  # Todas las columnas excepto la última
-    y = data.iloc[:, -1]   # Última columna como etiquetas
+    X = data.iloc[:, :]  # Todas las columnas excepto la última
+    y = data.iloc[:, ]   # Última columna como etiquetas
     
     # Aplicar selección de características si se proporcionan índices
     if gain_indices is not None:
         X = X.iloc[:, gain_indices]
     
     return X.values, y.values
+
 
 def activation_function(x, activation='sigmoid', alpha=1.0, scale=1.67326324):
     """Apply the selected activation function"""
