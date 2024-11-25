@@ -1,5 +1,6 @@
 # Extreme Deep Learning
 import numpy as np
+import pandas as pd
 import utility as ut
 
 def train_edl():
@@ -42,6 +43,19 @@ def train_edl():
     np.save('bias.npy', bias)
     np.save('beta.npy', beta)
     
+    # Crear y guardar la matriz de confusión
+    confusion_matrix = [
+        [metrics['TP'], metrics['FP']],
+        [metrics['FN'], metrics['TN']]
+    ]
+    df_confusion = pd.DataFrame(confusion_matrix, columns=['Positive', 'Negative'], index=['Actual Positive', 'Actual Negative'])
+    df_confusion.to_csv('confusion.csv', index=True)
+    
+    # Guardar F1-Score en un archivo CSV
+    df_fscore = pd.DataFrame([metrics['f1_score']], columns=['F1-Score'])
+    df_fscore.to_csv('fscore.csv', index=False)
+    
+    # Imprimir resultados
     print("\nTraining Results:")
     print(f"Accuracy: {metrics['accuracy']:.4f}")
     print(f"Cost: {training_cost:.4f}")
